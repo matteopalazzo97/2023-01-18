@@ -5,6 +5,7 @@
 package it.polito.tdp.nyc;
 
 import java.net.URL;
+import java.util.Map;
 import java.util.ResourceBundle;
 import it.polito.tdp.nyc.model.Model;
 import javafx.event.ActionEvent;
@@ -34,7 +35,7 @@ public class FXMLController {
     private Button btnPercorso; // Value injected by FXMLLoader
 
     @FXML // fx:id="cmbProvider"
-    private ComboBox<?> cmbProvider; // Value injected by FXMLLoader
+    private ComboBox<String> cmbProvider; // Value injected by FXMLLoader
 
     @FXML // fx:id="txtDistanza"
     private TextField txtDistanza; // Value injected by FXMLLoader
@@ -51,6 +52,15 @@ public class FXMLController {
     @FXML
     void doAnalisiGrafo(ActionEvent event) {
     	
+    	this.txtResult.appendText("\n\n");
+    	this.txtResult.appendText("Vertici con più vicini:\n");
+    	
+    	Map<String, Integer> mappaMax = this.model.getNodiMax();
+    	
+    	for(String s: mappaMax.keySet()) {
+    		this.txtResult.appendText("\n" + s + ", # vicini: " + mappaMax.get(s));
+    	}
+    	
     }
 
     @FXML
@@ -60,6 +70,39 @@ public class FXMLController {
 
     @FXML
     void doCreaGrafo(ActionEvent event) {
+    	
+    	this.txtResult.clear();
+    	
+    	String provider;
+    	
+    	if(this.cmbProvider.getValue() == null) {
+    		this.txtResult.setText("Seleziona un valore dalla tendina.");
+    		return;
+    	} else {
+    		provider = this.cmbProvider.getValue();
+    	}
+    	
+    	Double x;
+    	
+    	if(this.txtDistanza.getText() == "") {
+    		this.txtResult.setText("Inserisci un valore per la distanza.");
+    		return;
+    	}
+    	
+    	try {
+    		x = Double.parseDouble(this.txtDistanza.getText());
+    	} catch (NumberFormatException e) {
+    		e.printStackTrace();
+    		this.txtResult.setText("Inserire un valore numerico per la distanza.");
+    		return;
+    	}
+    	
+    	this.model.creaGrafo(provider, x);
+    	
+    	this.txtResult.setText("Grafo creato.\n");
+    	this.txtResult.appendText("Vertici: " + this.model.getNumVertici());
+    	this.txtResult.appendText("\nArchi:   " + this.model.getNumArchi());
+
     	
     }
 
@@ -77,5 +120,7 @@ public class FXMLController {
 
     public void setModel(Model model) {
     	this.model = model;
+    	
+    	this.cmbProvider.getItems().addAll(this.model.tendina());
     }
 }

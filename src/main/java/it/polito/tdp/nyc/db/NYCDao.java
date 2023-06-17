@@ -6,7 +6,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.javadocmd.simplelatlng.LatLng;
+
 import it.polito.tdp.nyc.model.Hotspot;
+import it.polito.tdp.nyc.model.LocationLatLng;
 
 public class NYCDao {
 	
@@ -36,5 +40,78 @@ public class NYCDao {
 		return result;
 	}
 	
+	
+	public List<String> getVertici(String provider){
+		String sql = "SELECT DISTINCT ny.`Location` "
+				+ "FROM `nyc_wifi_hotspot_locations` ny "
+				+ "WHERE ny.`Provider`= ?";
+		List<String> result = new ArrayList<>();
+		try {
+			Connection conn = DBConnect.getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setString(1, provider);
+			ResultSet res = st.executeQuery();
 
+			while (res.next()) {
+				result.add(res.getString("Location"));
+			}
+			
+			conn.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new RuntimeException("SQL Error");
+		}
+
+		return result;
+	}
+	
+	
+	public List<String> getTendina(){
+		String sql = "SELECT DISTINCT ny.`Provider` "
+				+ "FROM `nyc_wifi_hotspot_locations` ny";
+		List<String> result = new ArrayList<>();
+		try {
+			Connection conn = DBConnect.getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);
+			ResultSet res = st.executeQuery();
+
+			while (res.next()) {
+				result.add(res.getString("Provider"));
+			}
+			
+			conn.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new RuntimeException("SQL Error");
+		}
+
+		return result;
+	}
+	
+	public List<LocationLatLng> getLocations(String provider){
+		String sql = "SELECT ny.`Location`, AVG(`Latitude`) AS LatMedia, AVG(`Longitude`) AS LngMedia "
+				+ "FROM `nyc_wifi_hotspot_locations` ny "
+				+ "WHERE ny.`Provider`= ? "
+				+ "GROUP BY ny.`Location`";
+		List<LocationLatLng> result = new ArrayList<>();
+		try {
+			Connection conn = DBConnect.getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setString(1, provider);
+			ResultSet res = st.executeQuery();
+
+			while (res.next()) {
+				result.add(new LocationLatLng(res.getString("Location"),
+						new LatLng(res.getDouble("LatMedia"), res.getDouble("LngMedia"))));
+			}
+			
+			conn.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new RuntimeException("SQL Error");
+		}
+
+		return result;
+	}
+	
 }
