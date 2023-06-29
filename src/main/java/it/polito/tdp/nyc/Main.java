@@ -5,3 +5,5 @@ public class Main {
         EntryPoint.main(args);
     }
 }
+//pesato e non orientato
+//vertici con maggior numero di vicini
